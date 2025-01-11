@@ -775,7 +775,7 @@ class AnthropicAssistantContextAggregator(LLMAssistantContextAggregator):
                             ],
                         }
                     )
-                    run_llm = True
+                    run_llm = frame.run_llm
             elif aggregation:
                 self._context.add_message({"role": "assistant", "content": aggregation})
 

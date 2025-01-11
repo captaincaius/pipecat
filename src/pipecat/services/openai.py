@@ -581,7 +581,7 @@ class OpenAIAssistantContextAggregator(LLMAssistantContextAggregator):
                         }
                     )
                     # Only run the LLM if there are no more function calls in progress.
-                    run_llm = not bool(self._function_calls_in_progress)
+                    run_llm = frame.run_llm and not bool(self._function_calls_in_progress)
             else:
                 self._context.add_message({"role": "assistant", "content": aggregation})
 

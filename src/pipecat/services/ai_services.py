@@ -135,18 +135,21 @@ class LLMService(AIService):
         super().__init__(**kwargs)
         self._callbacks = {}
         self._start_callbacks = {}
+        self._bypass_run_llms = {}
 
     # TODO-CB: callback function type
-    def register_function(self, function_name: str | None, callback, start_callback=None):
+    def register_function(self, function_name: str | None, callback, start_callback=None, bypass_run_llm=False):
         # Registering a function with the function_name set to None will run that callback
         # for all functions
         self._callbacks[function_name] = callback
+        self._bypass_run_llms[function_name] = bypass_run_llm
         # QUESTION FOR CB: maybe this isn't needed anymore?
         if start_callback:
             self._start_callbacks[function_name] = start_callback
 
     def unregister_function(self, function_name: str | None):
         del self._callbacks[function_name]
+        del self._bypass_run_llms[function_name]
         if self._start_callbacks[function_name]:
             del self._start_callbacks[function_name]
 
@@ -171,13 +174,14 @@ class LLMService(AIService):
             f = self._callbacks[None]
         else:
             return None
+        gated_run_llm = run_llm and not self._bypass_run_llms.get(function_name, False)
         await context.call_function(
             f,
             function_name=function_name,
             tool_call_id=tool_call_id,
             arguments=arguments,
             llm=self,
-            run_llm=run_llm,
+            run_llm=gated_run_llm,
         )
 
     # QUESTION FOR CB: maybe this isn't needed anymore?
